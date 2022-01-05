@@ -46,6 +46,9 @@ pub struct Contract {
 
     //keeps track of the metadata for the contract
     pub metadata: LazyOption<NFTContractMetadata>,
+
+    //keeps track of vaxxed participants
+    pub vaxxxed: UnorderedSet<AccountId>,
 }
 
 /// Helper structure for keys of the persistent collections.
@@ -59,6 +62,7 @@ pub enum StorageKey {
     TokensPerType,
     TokensPerTypeInner { token_type_hash: CryptoHash },
     TokenTypesLocked,
+    Vaxxxed,
 }
 
 #[near_bindgen]
@@ -75,8 +79,8 @@ impl Contract {
             owner_id,
             NFTContractMetadata {
                 spec: "nft-1.0.0".to_string(),
-                name: "NFT Tutorial Contract".to_string(),
-                symbol: "GOTEAM".to_string(),
+                name: "thevarus".to_string(),
+                symbol: "VARUS".to_string(),
                 icon: None,
                 base_uri: None,
                 reference: None,
@@ -106,9 +110,14 @@ impl Contract {
                 StorageKey::NFTContractMetadata.try_to_vec().unwrap(),
                 Some(&metadata),
             ),
+            vaxxxed: UnorderedSet::new(StorageKey::Vaxxxed.try_to_vec().unwrap(),)
         };
 
         //return the Contract object
         this
     }
 }
+
+#[cfg(tests)]
+mod tests {}
+

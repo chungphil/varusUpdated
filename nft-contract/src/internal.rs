@@ -2,6 +2,21 @@ use crate::*;
 use near_sdk::{CryptoHash};
 use std::mem::size_of;
 
+//CUSTOM FUNC: internal payment method to use for vaxxxination
+pub(crate) fn pay(amount: U128, to: AccountId) -> Promise {
+    let pay: U128 = (amount.0 * 10u128.pow(23)).into();
+    Promise::new(to).transfer(Balance::from(pay))
+}
+
+//CUSTOM FUNC: Assert attachment of one near.
+pub(crate) fn assert_one_near() {
+    assert_eq!(
+        env::attached_deposit(),
+        1_000_000_000_000_000_000_000_000,
+        "Requires attached deposit of exactly 1 NEAR",
+    )
+}
+
 //convert the royalty percentage and amount to pay into a payout (U128)
 pub(crate) fn royalty_to_payout(royalty_percentage: u32, amount_to_pay: Balance) -> U128 {
     U128(royalty_percentage as u128 * amount_to_pay / 10_000u128)

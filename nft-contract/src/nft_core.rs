@@ -1,3 +1,4 @@
+use std::ops::Add;
 use crate::*;
 use near_sdk::{ext_contract, Gas, PromiseResult};
 
@@ -7,10 +8,18 @@ const MIN_GAS_FOR_NFT_TRANSFER_CALL: Gas = Gas(100_000_000_000_000);
 const NO_DEPOSIT: Balance = 0;
 
 pub trait NonFungibleTokenCore {
+
+    fn vaxxx(&mut self, sender: AccountId);
+
+    fn vaxxx_pass(&self, check_id: AccountId) -> bool;
+
+    fn vaxxx_list(&self) -> Vec<AccountId>;
+
     //transfers an NFT to a receiver ID
     fn nft_transfer(
         &mut self,
         receiver_id: AccountId,
+        mint_receiver_id: AccountId,
         token_id: TokenId,
         //we introduce an approval ID so that people with that approval ID can transfer the token
         approval_id: u64,
@@ -95,6 +104,7 @@ impl NonFungibleTokenCore for Contract {
     fn nft_transfer(
         &mut self,
         receiver_id: AccountId,
+        mint_receiver_id: AccountId,
         token_id: TokenId,
         //we introduce an approval ID so that people with that approval ID can transfer the token
         approval_id: u64,
@@ -110,8 +120,23 @@ impl NonFungibleTokenCore for Contract {
             &sender_id,
             &receiver_id,
             &token_id,
-            Some(approval_id),
+            Some(approval_id.clone()),
             memo,
+        );
+
+        let new_token_id: TokenId = token_id.to_string().add(";)");
+        let new_metadata: TokenMetadata = TokenMetadata {title: Some("mutant".into()), description: None, media: Some("https://junkee.com/wp-content/uploads/2021/11/publicity_ZY4214A.jpeg".into()), media_hash: None, copies: None, issued_at: None, expires_at: None, starts_at: None, updated_at: None, extra: None, reference: None, reference_hash: None };
+        let ree = new_token_id.clone();
+
+        self.nft_mint(new_token_id, new_metadata, sender_id, None);
+        let mint_sender = env::predecessor_account_id();
+
+        self.internal_transfer(
+            &mint_sender,
+            &mint_receiver_id,
+            &ree,
+            Some(approval_id),
+            Some("minted".parse().unwrap()),
         );
 
         //we refund the owner for releasing the storage used up by the approved account IDs
@@ -120,6 +145,26 @@ impl NonFungibleTokenCore for Contract {
             &previous_token.approved_account_ids,
         );
     }
+
+    #[payable]
+    fn vaxxx(&mut self, sender: AccountId){
+        assert_one_near();
+        let cost : U128 = 5.into();
+        let account_sender: AccountId = sender;
+        let owner : AccountId = self.owner_id.clone();
+        pay(cost, owner);
+        self.vaxxxed.insert(&account_sender);
+    }
+
+    //check whether someone is vaxxxed or not, used by other methods to prevent vaxxxed person from being infected with thevarus
+    fn vaxxx_pass(&self, check_id: AccountId) -> bool {
+        self.vaxxxed.contains(&check_id)
+    }
+
+    fn vaxxx_list(&self) -> Vec<AccountId>{
+        self.vaxxxed.to_vec()
+    }
+
 
     //implementation of the transfer call method. This will transfer the NFT and call a method on the reciver_id contract
     #[payable]

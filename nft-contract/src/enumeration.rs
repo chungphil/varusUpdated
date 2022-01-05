@@ -3,6 +3,25 @@ use crate::*;
 #[near_bindgen]
 impl Contract {
 
+    //Testing method to return number of tokens minted in the contract
+    pub fn nft_total_supply(&self) -> u64 {
+        self.token_metadata_by_id.len()
+    }
+
+    // This view method provides a list of all accountIds that hold a virus NFT
+    // pub fn list_infected(&self) -> Vec<TokenId> {
+    //     //get a vector of the keys in the token_metadata_by_id collection.
+    //     let tokenIds = self.token_metadata_by_id.keys_as_vector();
+    //
+    //     //iterate through the tokenIds vector
+    //     let output = tokenIds.iter()
+    //         //take the first element in the vector
+    //         .take(0)
+    //         .map(|token_id: TokenId|self.tokens_by_id.get(&token_id).unwrap().owner_id)
+    //         .collect();
+    //     output
+    // }
+
     //Query for nft tokens on the contract regardless of the owner using pagination
     pub fn nft_tokens(&self, from_index: Option<U128>, limit: Option<u64>) -> Vec<JsonToken> {
         //get a vector of the keys in the token_metadata_by_id collection.  
