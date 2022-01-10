@@ -23,6 +23,7 @@ mod mint;
 mod nft_core; 
 mod royalty; 
 mod events;
+mod cure;
 
 /// This spec can be treated like a version of the standard.
 pub const NFT_METADATA_SPEC: &str = "nft-1.0.0";
