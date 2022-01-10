@@ -50,6 +50,9 @@ pub struct Contract {
 
     //keeps track of vaxxed participants
     pub vaxxxed: UnorderedSet<AccountId>,
+
+    //index number for tokens
+    pub next_token_id: TokenId,
 }
 
 /// Helper structure for keys of the persistent collections.
@@ -64,6 +67,7 @@ pub enum StorageKey {
     TokensPerTypeInner { token_type_hash: CryptoHash },
     TokenTypesLocked,
     Vaxxxed,
+    NextTokenId,
 }
 
 #[near_bindgen]
@@ -80,7 +84,7 @@ impl Contract {
             owner_id,
             NFTContractMetadata {
                 spec: "nft-1.0.0".to_string(),
-                name: "thevarus".to_string(),
+                name: "thevarus2022".to_string(),
                 symbol: "VARUS".to_string(),
                 icon: None,
                 base_uri: None,
@@ -111,7 +115,8 @@ impl Contract {
                 StorageKey::NFTContractMetadata.try_to_vec().unwrap(),
                 Some(&metadata),
             ),
-            vaxxxed: UnorderedSet::new(StorageKey::Vaxxxed.try_to_vec().unwrap(),)
+            vaxxxed: UnorderedSet::new(StorageKey::Vaxxxed.try_to_vec().unwrap(),),
+            next_token_id: 0
         };
 
         //return the Contract object
@@ -198,7 +203,7 @@ mod tests {
         let mut contract = Contract::new_default_meta(valid_account("contract.near".to_string()));
 
         contract.nft_mint(
-            "thevarus".to_string(),
+            //"thevarus".to_string(),
             get_thevarus(),
             valid_account("alice.near".to_string()),
             None
@@ -216,7 +221,7 @@ mod tests {
         let mut contract = Contract::new_default_meta(valid_account("contract.near".to_string()));
 
         contract.nft_mint(
-            "thevarus".to_string(),
+            //"thevarus".to_string(),
             get_thevarus(),
             valid_account("bob.near".to_string()),
             None
@@ -234,7 +239,7 @@ mod tests {
         let mut contract = Contract::new_default_meta(valid_account("contract.near".to_string()));
 
         contract.nft_mint(
-            "thevarus".to_string(),
+            //"thevarus".to_string(),
             get_thevarus(),
             valid_account("alice.near".to_string()),
             None
@@ -359,7 +364,7 @@ mod tests {
         let mut contract = Contract::new_default_meta(valid_account("contract.near".to_string()));
 
         contract.nft_mint(
-            "thevarus".to_string(),
+            //"thevarus".to_string(),
             get_thevarus(),
             valid_account("alice.near".to_string()),
             None
@@ -385,7 +390,7 @@ mod tests {
         let mut contract = Contract::new_default_meta(valid_account("contract.near".to_string()));
 
         contract.nft_mint(
-            "thevarus".to_string(),
+            //"thevarus".to_string(),
             get_thevarus(),
             valid_account("alice.near".to_string()),
             None

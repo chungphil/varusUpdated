@@ -24,4 +24,10 @@ impl Contract {
         env::log_str("Cured of thevarus");
     }
 
+    pub fn swab_test(&self)-> Vec<TokenId> {
+        //get the sender address
+        let sender_id = env::predecessor_account_id();
+        let allownertokens = self.tokens_per_owner.get(&sender_id).expect("Negative Varus test").to_vec();
+        allownertokens
+    }
 }

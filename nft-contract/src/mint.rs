@@ -5,12 +5,17 @@ impl Contract {
     #[payable]
     pub fn nft_mint(
         &mut self,
-        token_id: TokenId,
+        //token_id: TokenId,
         metadata: TokenMetadata,
         receiver_id: AccountId,
         //we add an optional parameter for perpetual royalties
         perpetual_royalties: Option<HashMap<AccountId, u32>>,
     ) {
+        //PHIL TokenID generated instead of inputted
+        let token_id = self.next_token_id;
+        self.next_token_id += 1;
+
+
         //measure the initial storage being used on the contract
         let initial_storage_usage = env::storage_usage();
 

@@ -1,5 +1,5 @@
 use crate::*;
-pub type TokenId = String;
+pub type TokenId = u64;
 //defines the payout type we'll be returning as a part of the royalty standards.
 #[derive(Serialize, Deserialize)]
 #[serde(crate = "near_sdk::serde")]

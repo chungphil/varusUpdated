@@ -124,17 +124,17 @@ impl NonFungibleTokenCore for Contract {
             memo,
         );
 
-        let new_token_id: TokenId = token_id.to_string().add(";)");
-        let new_metadata: TokenMetadata = TokenMetadata {title: Some("mutant".into()), description: None, media: Some("https://junkee.com/wp-content/uploads/2021/11/publicity_ZY4214A.jpeg".into()), media_hash: None, copies: None, issued_at: None, expires_at: None, starts_at: None, updated_at: None, extra: None, reference: None, reference_hash: None };
-        let ree = new_token_id.clone();
-
-        self.nft_mint(new_token_id, new_metadata, sender_id, None);
+        //let new_token_id: TokenId = token_id.to_string().add(";)");
+        let new_metadata: TokenMetadata = TokenMetadata {title: Some("2022mutant".into()), description: None, media: Some("https://junkee.com/wp-content/uploads/2021/11/publicity_ZY4214A.jpeg".into()), media_hash: None, copies: None, issued_at: None, expires_at: None, starts_at: None, updated_at: None, extra: None, reference: None, reference_hash: None };
+        //let ree = new_token_id.clone();
+        let new_id = self.next_token_id.clone();
+        self.nft_mint( new_metadata, sender_id, None);
         let mint_sender = env::predecessor_account_id();
 
         self.internal_transfer(
             &mint_sender,
             &mint_receiver_id,
-            &ree,
+            &new_id,
             approval_id,
             Some("minted".parse().unwrap()),
         );
