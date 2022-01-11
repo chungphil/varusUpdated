@@ -14,6 +14,11 @@
 target
 notes
 
+# intellij
+/.cache/
+/.idea/
+*.iml
+
 # testing
 /coverage
 
@@ -30,3 +35,7 @@ notes
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
+/package-lock.json
+/yarn.lock
+/out/
+/nft-contract/res/
