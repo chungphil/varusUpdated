@@ -126,9 +126,7 @@ impl Contract {
 
 #[cfg(test)]
 mod tests {
-    use std::convert::TryFrom;
     use super::*;
-    use near_sdk::MockedBlockchain;
     use near_sdk::{testing_env, VMContext};
     use near_sdk::test_utils::test_env::{alice, bob, carol};
 
@@ -173,8 +171,23 @@ mod tests {
     }
 
     /// Helper function to construct a valid account from input string
-    fn valid_account(input : String) -> AccountId {
-        AccountId::try_from(input).expect("not a valid account id")
+    pub fn contract() -> AccountId {
+        AccountId::new_unchecked("contract.near".to_string())
+    }
+
+    /// Helper function to construct the burn address
+    fn burn() -> AccountId {
+        AccountId::new_unchecked("burn.near".to_string())
+    }
+
+    /// Helper function to construct the original TokenID
+    fn original() -> TokenId {
+        0u64
+    }
+
+    /// Helper function to construct the mutant TokenID
+    fn mutant() -> TokenId {
+        1u64
     }
 
     /// Ensure initialisation of metadata works and that the vaxxx list begins empty
@@ -182,7 +195,7 @@ mod tests {
     fn check_initialisation() {
         let context = get_context(alice().to_string(), 0);
         testing_env!(context);
-        let mut contract = Contract::new_default_meta(valid_account("contract.near".to_string()));
+        let mut contract = Contract::new_default_meta(contract());
         assert_eq!(0, contract.vaxxxed.len(), "Expected vaxxxed to be an empty vector.");
 
         let option = contract.metadata.take().unwrap();
@@ -200,16 +213,15 @@ mod tests {
     fn mint_no_receiver() {
         let context = get_context(alice().to_string(), 0);
         testing_env!(context);
-        let mut contract = Contract::new_default_meta(valid_account("contract.near".to_string()));
+        let mut contract = Contract::new_default_meta(contract());
 
         contract.nft_mint(
-            //"thevarus".to_string(),
             get_thevarus(),
-            valid_account("alice.near".to_string()),
+            alice(),
             None
         );
 
-        let token = contract.tokens_by_id.get(&TokenId::from(0u64)).unwrap();
+        let token = contract.tokens_by_id.get(&original()).unwrap();
         assert_eq!(alice(), token.owner_id, "Token should belong to alice.");
     }
 
@@ -218,16 +230,15 @@ mod tests {
     fn mint_with_receiver() {
         let context = get_context(alice().to_string(), 0);
         testing_env!(context);
-        let mut contract = Contract::new_default_meta(valid_account("contract.near".to_string()));
+        let mut contract = Contract::new_default_meta(contract());
 
         contract.nft_mint(
-            //"thevarus".to_string(),
             get_thevarus(),
-            valid_account("bob.near".to_string()),
+            bob(),
             None
         );
 
-        let token = contract.tokens_by_id.get(&TokenId::from(0u64)).unwrap();
+        let token = contract.tokens_by_id.get(&original()).unwrap();
         assert_eq!(bob(), token.owner_id, "Token should belong to bob.");
     }
 
@@ -236,16 +247,15 @@ mod tests {
     fn mint_check_metadata() {
         let context = get_context(alice().to_string(), 0);
         testing_env!(context);
-        let mut contract = Contract::new_default_meta(valid_account("contract.near".to_string()));
+        let mut contract = Contract::new_default_meta(contract());
 
         contract.nft_mint(
-            //"thevarus".to_string(),
             get_thevarus(),
-            valid_account("alice.near".to_string()),
+            alice(),
             None
         );
 
-        let actual = contract.token_metadata_by_id.get(&TokenId::from(0u64)).unwrap();
+        let actual = contract.token_metadata_by_id.get(&original()).unwrap();
         let expected = get_thevarus();
         assert_eq!(expected.title, actual.title, "Expected title to be equal.");
         assert_eq!(expected.description, actual.description, "Expected description to be equal.");
@@ -265,92 +275,89 @@ mod tests {
     //// Cure Tests ////
     ////////////////////
 
-    // /// Test cure for a single token
-    // #[test]
-    // fn check_cure() {
-    //     let context = get_context(alice().to_string(), 0);
-    //     testing_env!(context);
-    //     let mut contract = Contract::new_default_meta(valid_account("contract.near".to_string()));
-    //
-    //     assert_eq!(U128::from(0), contract.nft_supply_for_owner(alice()), "Alice should not be infected yet.");
-    //
-    //     // Mint a token
-    //     contract.nft_mint(
-    //         "thevarus".to_string(),
-    //         get_thevarus(),
-    //         valid_account("alice.near".to_string()),
-    //         None
-    //     );
-    //
-    //     // Get the minted token
-    //     let token = contract.tokens_by_id.get(&TokenId::from("thevarus")).unwrap();
-    //
-    //     assert_eq!(alice(), token.owner_id, "Token should belong to alice after transfer.");
-    //     assert_eq!(U128::from(1), contract.nft_supply_for_owner(alice()), "Alice should be infected.");
-    //
-    //     // Cure self
-    //     contract.nft_cure();
-    //
-    //     let token = contract.tokens_by_id.get(&TokenId::from("thevarus")).unwrap();
-    //     assert_eq!("burn.near", token.owner_id, "Token should belong to burn after transfer.");
-    //     assert_eq!(U128::from(0), contract.nft_supply_for_owner(alice()), "Alice should no longer be infected.");
-    // }
-    //
-    // /// Test cure for multiple tokens
-    // #[test]
-    // fn check_multi_cure() {
-    //     let context = get_context(alice().to_string(), 0);
-    //     testing_env!(context);
-    //     let mut contract = Contract::new_default_meta(valid_account("contract.near".to_string()));
-    //
-    //     assert_eq!(U128::from(0), contract.nft_supply_for_owner(alice()), "Alice should not be infected yet.");
-    //
-    //     // Mint tokens
-    //     contract.nft_mint(
-    //         "thevarus1".to_string(),
-    //         get_thevarus(),
-    //         valid_account("alice.near".to_string()),
-    //         None
-    //     );
-    //
-    //     contract.nft_mint(
-    //         "thevarus2".to_string(),
-    //         get_thevarus(),
-    //         valid_account("alice.near".to_string()),
-    //         None
-    //     );
-    //
-    //     // Get the minted token
-    //     let token1 = contract.tokens_by_id.get(&TokenId::from("thevarus1")).unwrap();
-    //     let token2 = contract.tokens_by_id.get(&TokenId::from("thevarus2")).unwrap();
-    //
-    //     assert_eq!(alice(), token1.owner_id, "Token should belong to alice after transfer.");
-    //     assert_eq!(alice(), token2.owner_id, "Token should belong to alice after transfer.");
-    //     assert_eq!(U128::from(2), contract.nft_supply_for_owner(alice()), "Alice should be infected.");
-    //
-    //     // Cure self
-    //     contract.nft_cure();
-    //
-    //     // Get the minted token
-    //     let cured1 = contract.tokens_by_id.get(&TokenId::from("thevarus1")).unwrap();
-    //     let cured2 = contract.tokens_by_id.get(&TokenId::from("thevarus2")).unwrap();
-    //     assert_eq!("burn.near", cured1.owner_id, "Token should belong to burn after transfer.");
-    //     assert_eq!("burn.near", cured2.owner_id, "Token should belong to burn after transfer.");
-    //     assert_eq!(U128::from(0), contract.nft_supply_for_owner(alice()), "Alice should no longer be infected.");
-    // }
-    //
-    //
-    // /// Test cure panics if a user is not infected
-    // #[test]
-    // #[should_panic]
-    // fn cure_panics_non_infected() {
-    //     let context = get_context(alice().to_string(), 0);
-    //     testing_env!(context);
-    //     let mut contract = Contract::new_default_meta(valid_account("contract.near".to_string()));
-    //
-    //     // Cure self
-    //     contract.nft_cure();
-    // }
+    /// Test cure for a single token
+    #[test]
+    fn check_cure() {
+        let context = get_context(alice().to_string(), 0);
+        testing_env!(context);
+        let mut contract = Contract::new_default_meta(contract());
+
+        assert_eq!(U128::from(0), contract.nft_supply_for_owner(alice()), "Alice should not be infected yet.");
+
+        // Mint a token
+        contract.nft_mint(
+            get_thevarus(),
+            alice(),
+            None
+        );
+
+        // Get the minted token
+        let token = contract.tokens_by_id.get(&original()).unwrap();
+
+        assert_eq!(alice(), token.owner_id, "Token should belong to alice after transfer.");
+        assert_eq!(U128::from(1), contract.nft_supply_for_owner(alice()), "Alice should be infected.");
+
+        // Cure self
+        contract.nft_cure();
+
+        let token = contract.tokens_by_id.get(&original()).unwrap();
+        assert_eq!(burn(), token.owner_id, "Token should belong to burn after transfer.");
+        assert_eq!(U128::from(0), contract.nft_supply_for_owner(alice()), "Alice should no longer be infected.");
+    }
+
+    /// Test cure for multiple tokens
+    #[test]
+    fn check_multi_cure() {
+        let context = get_context(alice().to_string(), 0);
+        testing_env!(context);
+        let mut contract = Contract::new_default_meta(contract());
+
+        assert_eq!(U128::from(0), contract.nft_supply_for_owner(alice()), "Alice should not be infected yet.");
+
+        // Mint tokens
+        contract.nft_mint(
+            get_thevarus(),
+            alice(),
+            None
+        );
+
+        contract.nft_mint(
+            get_thevarus(),
+            alice(),
+            None
+        );
+
+        // Get the minted token
+        let token1 = contract.tokens_by_id.get(&original()).unwrap();
+        let token2 = contract.tokens_by_id.get(&mutant()).unwrap();
+
+        assert_eq!(alice(), token1.owner_id, "Token should belong to alice after transfer.");
+        assert_eq!(alice(), token2.owner_id, "Token should belong to alice after transfer.");
+        assert_eq!(U128::from(2), contract.nft_supply_for_owner(alice()), "Alice should be infected.");
+
+        // Cure self
+        contract.nft_cure();
+
+        // Get the minted token
+        let cured1 = contract.tokens_by_id.get(&original()).unwrap();
+        let cured2 = contract.tokens_by_id.get(&mutant()).unwrap();
+        assert_eq!(burn(), cured1.owner_id, "Token should belong to burn after transfer.");
+        assert_eq!(burn(), cured2.owner_id, "Token should belong to burn after transfer.");
+        assert_eq!(U128::from(0), contract.nft_supply_for_owner(alice()), "Alice should no longer be infected.");
+    }
+
+
+    /// Test cure panics if a user is not infected
+    #[test]
+    #[should_panic]
+    fn cure_panics_non_infected() {
+        let context = get_context(alice().to_string(), 0);
+        testing_env!(context);
+        let mut contract = Contract::new_default_meta(contract());
+
+        // Cure self
+        contract.nft_cure();
+    }
 
     ////////////////////////
     //// Transfer Tests ////
@@ -361,24 +368,23 @@ mod tests {
     fn transfer_sends_original() {
         let context = get_context(alice().to_string(), 0);
         testing_env!(context);
-        let mut contract = Contract::new_default_meta(valid_account("contract.near".to_string()));
+        let mut contract = Contract::new_default_meta(contract());
 
         contract.nft_mint(
-            //"thevarus".to_string(),
             get_thevarus(),
-            valid_account("alice.near".to_string()),
+            alice(),
             None
         );
 
         contract.nft_transfer(
-            valid_account("bob.near".to_string()),
-            valid_account("carol.near".to_string()),
-            0u64,
+            bob(),
+            carol(),
+            original(),
             None,
             None
         );
 
-        let token = contract.tokens_by_id.get(&TokenId::from(0u64)).unwrap();
+        let token = contract.tokens_by_id.get(&original()).unwrap();
         assert_eq!(bob(), token.owner_id, "Token should belong to bob after transfer.");
     }
 
@@ -387,24 +393,23 @@ mod tests {
     fn transfer_creates_mutant() {
         let context = get_context(alice().to_string(), 0);
         testing_env!(context);
-        let mut contract = Contract::new_default_meta(valid_account("contract.near".to_string()));
+        let mut contract = Contract::new_default_meta(contract());
 
         contract.nft_mint(
-            //"thevarus".to_string(),
             get_thevarus(),
-            valid_account("alice.near".to_string()),
+            alice(),
             None
         );
 
         contract.nft_transfer(
-            valid_account("bob.near".to_string()),
-            valid_account("carol.near".to_string()),
-            0u64,
+            bob(),
+            carol(),
+            original(),
             None,
             None
         );
 
-        let token = contract.tokens_by_id.get(&TokenId::from(1u64)).unwrap();
+        let token = contract.tokens_by_id.get(&mutant()).unwrap();
         assert_eq!(carol(), token.owner_id, "Token should belong to bob after transfer.");
     }
 
@@ -417,12 +422,12 @@ mod tests {
     fn vaxxx_adds_to_vaxxxed() {
         let context = get_context(bob().to_string(), 0);
         testing_env!(context);
-        let mut contract = Contract::new_default_meta(valid_account("contract.near".to_string()));
+        let mut contract = Contract::new_default_meta(contract());
         assert_eq!(0, contract.vaxxxed.len(), "Expected empty vaxxx list."); // Sanity check
 
         // vaxxx alice and bob
-        contract.vaxxx(valid_account("alice.near".to_string()));
-        contract.vaxxx(valid_account("bob.near".to_string()));
+        contract.vaxxx(alice());
+        contract.vaxxx(bob());
 
         // ensure vaxxx list now contains both alice and bob
         assert_eq!(2, contract.vaxxxed.len(), "Expected single addition to vaxxx list.");
@@ -435,12 +440,12 @@ mod tests {
     fn check_vaxxx_pass() {
         let context = get_context(bob().to_string(), 0);
         testing_env!(context);
-        let mut contract = Contract::new_default_meta(valid_account("contract.near".to_string()));
+        let mut contract = Contract::new_default_meta(contract());
         assert_eq!(0, contract.vaxxxed.len(), "Expected empty vaxxx list."); // Sanity check
 
-        contract.vaxxx(valid_account("alice.near".to_string())); // Vaxxx alice
-        assert!(contract.vaxxx_pass(valid_account("alice.near".to_string())), "Expected alice to be vaxxxed");
-        assert!(!contract.vaxxx_pass(valid_account("bob.near".to_string())), "Expected bob to be un-vaxxxed");
+        contract.vaxxx(alice()); // Vaxxx alice
+        assert!(contract.vaxxx_pass(alice()), "Expected alice to be vaxxxed");
+        assert!(!contract.vaxxx_pass(bob()), "Expected bob to be un-vaxxxed");
     }
 
     /// Check that the vaxxx_list contains all of the added addresses
@@ -448,12 +453,12 @@ mod tests {
     fn check_vaxxx_list() {
         let context = get_context(bob().to_string(), 0);
         testing_env!(context);
-        let mut contract = Contract::new_default_meta(valid_account("contract.near".to_string()));
+        let mut contract = Contract::new_default_meta(contract());
         assert_eq!(0, contract.vaxxxed.len(), "Expected empty vaxxx list."); // Sanity check
 
         // Vaxxx alice and bob
-        contract.vaxxx(valid_account("alice.near".to_string()));
-        contract.vaxxx(valid_account("bob.near".to_string()));
+        contract.vaxxx(alice());
+        contract.vaxxx(bob());
 
         // Check vaxxx_list
         let vaxxxed_vector = contract.vaxxx_list();
