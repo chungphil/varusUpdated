@@ -187,7 +187,7 @@ mod tests {
 
         let option = contract.metadata.take().unwrap();
         assert_eq!("nft-1.0.0", option.spec, "Expected different spec.");
-        assert_eq!("thevarus", option.name, "Expected different name.");
+        assert_eq!("thevarus2022", option.name, "Expected different name.");
         assert_eq!("VARUS",option.symbol,"Expected different symbol.");
     }
 
@@ -209,7 +209,7 @@ mod tests {
             None
         );
 
-        let token = contract.tokens_by_id.get(&TokenId::from("thevarus")).unwrap();
+        let token = contract.tokens_by_id.get(&TokenId::from(0u64)).unwrap();
         assert_eq!(alice(), token.owner_id, "Token should belong to alice.");
     }
 
@@ -227,7 +227,7 @@ mod tests {
             None
         );
 
-        let token = contract.tokens_by_id.get(&TokenId::from("thevarus")).unwrap();
+        let token = contract.tokens_by_id.get(&TokenId::from(0u64)).unwrap();
         assert_eq!(bob(), token.owner_id, "Token should belong to bob.");
     }
 
@@ -245,7 +245,7 @@ mod tests {
             None
         );
 
-        let actual = contract.token_metadata_by_id.get(&TokenId::from("thevarus")).unwrap();
+        let actual = contract.token_metadata_by_id.get(&TokenId::from(0u64)).unwrap();
         let expected = get_thevarus();
         assert_eq!(expected.title, actual.title, "Expected title to be equal.");
         assert_eq!(expected.description, actual.description, "Expected description to be equal.");
@@ -373,12 +373,12 @@ mod tests {
         contract.nft_transfer(
             valid_account("bob.near".to_string()),
             valid_account("carol.near".to_string()),
-            "thevarus".to_string(),
+            0u64,
             None,
             None
         );
 
-        let token = contract.tokens_by_id.get(&TokenId::from("thevarus")).unwrap();
+        let token = contract.tokens_by_id.get(&TokenId::from(0u64)).unwrap();
         assert_eq!(bob(), token.owner_id, "Token should belong to bob after transfer.");
     }
 
@@ -399,12 +399,12 @@ mod tests {
         contract.nft_transfer(
             valid_account("bob.near".to_string()),
             valid_account("carol.near".to_string()),
-            "thevarus".to_string(),
+            0u64,
             None,
             None
         );
 
-        let token = contract.tokens_by_id.get(&TokenId::from("thevarus;)")).unwrap();
+        let token = contract.tokens_by_id.get(&TokenId::from(1u64)).unwrap();
         assert_eq!(carol(), token.owner_id, "Token should belong to bob after transfer.");
     }
 
