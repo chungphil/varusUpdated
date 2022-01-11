@@ -209,6 +209,7 @@ mod tests {
     ////////////////////
 
     /// Ensure that minting without providing a receiver id sends the NFT to the caller
+    /// FIXME this doesnt make sense any more
     #[test]
     fn mint_no_receiver() {
         let context = get_context(alice().to_string(), 0);
